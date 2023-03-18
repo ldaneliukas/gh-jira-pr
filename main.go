@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if err := cli(); err != nil {
-		fmt.Fprintf(os.Stderr, "gh-ask failed: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "gh-jira-pr failed: %s\n", err.Error())
 		os.Exit(1)
 	}
 }
@@ -68,7 +68,7 @@ func cli() error {
 		_, _, err = jiraClient.Issue.AddRemoteLink(ctx, *jiraIssue, &jira.RemoteLink{
 			Object: &jira.RemoteLinkObject{
 				URL:   prURL,
-				Title: issue.Fields.Summary,
+				Title: fmt.Sprintf("Pull Request: %v", issue.Fields.Summary),
 			},
 		})
 		if err != nil {
