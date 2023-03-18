@@ -70,7 +70,7 @@ func cli() error {
 	prURL := xurlsStrict.FindAllString(pr.String(), -1)
 
 	// Update Jira issue with pull reqeust URL
-	if prURL[0] != "" {
+	if len(prURL) > 0 {
 		_, _, err = jiraClient.Issue.AddRemoteLink(ctx, *jiraIssue, &jira.RemoteLink{
 			Object: &jira.RemoteLinkObject{
 				URL:   prURL[0],
