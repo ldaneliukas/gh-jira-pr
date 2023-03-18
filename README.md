@@ -8,7 +8,7 @@
 2. Install this extension:
 
     ```shell
-    gh extension install it/gh-jira-pr
+    gh extension install ldaneliukas/gh-jira-pr
     ```
 
 3. Login to GitHub `gh auth login`
