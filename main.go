@@ -67,13 +67,13 @@ func cli() error {
 
 	// Get pull request URL
 	xurlsStrict := xurls.Strict()
-	prURL := xurlsStrict.FindAllString(pr.String(), -1)[0]
+	prURL := xurlsStrict.FindAllString(pr.String(), -1)
 
 	// Update Jira issue with pull reqeust URL
-	if prURL != "" {
+	if prURL[0] != "" {
 		_, _, err = jiraClient.Issue.AddRemoteLink(ctx, *jiraIssue, &jira.RemoteLink{
 			Object: &jira.RemoteLinkObject{
-				URL:   prURL,
+				URL:   prURL[0],
 				Title: fmt.Sprintf("Pull Request: %v", issue.Fields.Summary),
 			},
 		})
