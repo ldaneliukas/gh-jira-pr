@@ -1,6 +1,14 @@
 # gh-jira-pr
 
-✨ A GitHub (`gh`) [CLI](https://cli.github.com/) extension to create GitHub pull requests based on Jira issues.
+✨ A GitHub (`gh`) [CLI](https://cli.github.com/) extension to create GitHub pull requests based on Jira issues. The pull request will then be added to the Jira task as a web link.
+
+Field mapping:
+
+- Jira issue summary     -> Pull request title
+- Jira issue description -> Pull request body
+- Jira issue subtasks    -> Pull request body tasks
+
+Note, when `--web` is used, the pull request will not be linked to the Jira issue.
 
 ## Setup
 
