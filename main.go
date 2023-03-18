@@ -21,11 +21,11 @@ func main() {
 func cli() error {
 
 	jiraURL := kingpin.Flag("jira-url", "Jira URL").Envar("JIRA_URL").String()
-	jiraUser := kingpin.Flag("jira-user", "Jira user").Envar("JIRA_USER").Required().String()
-	jiraToken := kingpin.Flag("jira-token", "Jira token").Envar("JIRA_TOKEN").Required().String()
-	jiraIssue := kingpin.Arg("jira-issue", "Jira issue").Required().String()
-	ghWeb := kingpin.Flag("web", "Open PR in browser").Bool()
-	//kingpin.Flag("web", "Open PR in browser").String()
+	jiraUser := kingpin.Flag("jira-user", "Jira username").Envar("JIRA_USER").Required().String()
+	jiraToken := kingpin.Flag("jira-token", "Jira auth token").Envar("JIRA_TOKEN").Required().String()
+	jiraIssue := kingpin.Arg("jira-issue", "Jira issue to base the pul request on").Required().String()
+	ghWeb := kingpin.Flag("web", "Open the web browser to create a pull request").Bool()
+
 	kingpin.Parse()
 
 	ctx := context.Background()

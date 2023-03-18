@@ -16,30 +16,19 @@
 
 ## Usage
 
-```shell
-gh jira-pr <command> [flags]
-```
-
-### Commands
-
-Commands  | Description
---------- | -------------
-create    | create a pull request from supplied Jira ticket
-
-#### Create
-
 Create a pull request from the supplied Jira ticket
 
 ```shell
 USAGE:
- gh jira-pr create [flags]
+ gh jira-pr <issue> [flags]
 
 
 ARGUMENTS:
- No Arguments
+ issue <string> Jira Issue number
 
 
 FLAGS:
+ --web                         <string>  Open the web browser to create a pull request
  --jira-url   (env JIRA_URL)   <string>  Jira server URL
  --jira-user  (env JIRA_USER)  <string>  Jira username 
  --jira-token (env JIRA_TOKEN) <string>  Jira auth token
