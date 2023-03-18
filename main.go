@@ -24,6 +24,8 @@ func cli() error {
 	jiraUser := kingpin.Flag("jira-user", "Jira user").Envar("JIRA_USER").Required().String()
 	jiraToken := kingpin.Flag("jira-token", "Jira token").Envar("JIRA_TOKEN").Required().String()
 	jiraIssue := kingpin.Arg("jira-issue", "Jira issue").Required().String()
+	ghWeb := kingpin.Flag("web", "Open PR in browser").Bool()
+	//kingpin.Flag("web", "Open PR in browser").String()
 	kingpin.Parse()
 
 	ctx := context.Background()
@@ -54,7 +56,11 @@ func cli() error {
 	}
 
 	// Create pull request
-	pr, _, err := gh.Exec("pr", "create", "--title", issue.Fields.Summary, "--body", body)
+	ghExecArgs := []string{"pr", "create", "--title", issue.Fields.Summary, "--body", body}
+	if *ghWeb {
+		ghExecArgs = append(ghExecArgs, "--web")
+	}
+	pr, _, err := gh.Exec(ghExecArgs...)
 	if err != nil {
 		return fmt.Errorf("could not create pull request: %v", err.Error())
 	}
