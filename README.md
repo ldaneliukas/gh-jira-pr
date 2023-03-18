@@ -24,7 +24,7 @@ USAGE:
 
 
 ARGUMENTS:
- issue <string> Jira Issue number
+ issue                         <string>  Jira Issue
 
 
 FLAGS:
