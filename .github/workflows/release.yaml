@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  release:
+    types: [published]
+
+env:
+  GO_VERSION: 1.19
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Lint Go code
+        uses: golangci/golangci-lint-action@v2
+        with:
+          skip-pkg-cache: true
+          skip-build-cache: true
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
+      - name: Test
+        run: go test -cover -v 2>&1 ./... | go-junit-report -set-exit-code > report.xml
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    needs: [test, lint]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cli/gh-extension-precompile@v1
+        with:
+          go_version: ${{ env.GO_VERSION }}
+
