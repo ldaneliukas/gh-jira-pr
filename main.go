@@ -105,6 +105,9 @@ func cli() error {
 			return fmt.Errorf("could not add pull request link to Jira issue: %v", err.Error())
 		}
 	}
+
+	fmt.Printf("Pull request: %v\nJira issue: %vbrowse/%v", prURL, jiraClient.BaseURL, *jiraIssue)
+
 	return nil
 }
 
