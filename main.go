@@ -72,7 +72,7 @@ func cli() error {
 	body := ""
 	body += fmt.Sprintf("## [%v: %v](%v/browse/%v)\n\n", *jiraIssue, issue.Fields.Summary, *jiraURL, *jiraIssue)
 	body += fmt.Sprintf("### Description\n%v\n\n", issue.Fields.Description)
-	if issue.Fields.Subtasks != nil {
+	if len(issue.Fields.Subtasks) > 0 {
 		body += "### Tasks\n"
 		for _, subtask := range issue.Fields.Subtasks {
 			body += fmt.Sprintf("- [ ] %v\n", subtask.Fields.Summary)
