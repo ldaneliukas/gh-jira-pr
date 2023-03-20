@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 	"github.com/cli/go-gh"
+	"github.com/go-git/go-git/v5"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"mvdan.cc/xurls/v2"
 )
@@ -23,12 +26,33 @@ func cli() error {
 	jiraURL := kingpin.Flag("jira-url", "Jira URL").Envar("JIRA_URL").String()
 	jiraUser := kingpin.Flag("jira-user", "Jira username").Envar("JIRA_USER").Required().String()
 	jiraToken := kingpin.Flag("jira-token", "Jira auth token").Envar("JIRA_TOKEN").Required().String()
-	jiraIssue := kingpin.Arg("jira-issue", "Jira issue to base the pul request on").Required().String()
+	jiraIssue := kingpin.Arg("jira-issue", "Jira issue to base the pul request on").String()
+	ref := kingpin.Flag("ref", "Use the current repository HEAD ref as the Jira issue").Bool()
 	ghWeb := kingpin.Flag("web", "Open the web browser to create a pull request").Bool()
 
 	kingpin.Parse()
 
 	ctx := context.Background()
+
+	if *ref {
+		r, err := git.PlainOpen(".")
+		if err != nil {
+			return fmt.Errorf("could not to load repository: %v", err.Error())
+		}
+		head, err := r.Head()
+		if err != nil {
+			return fmt.Errorf("could not retrieve head ref: %v", err.Error())
+		}
+		branch := strings.Split(head.String(), "refs/heads/")[1]
+		if !isJiraIssue(branch) {
+			return fmt.Errorf("ref '%v' does not look like a Jira issue", branch)
+		}
+		*jiraIssue = branch
+	}
+
+	if *jiraIssue == "" {
+		return fmt.Errorf("Jira issue was not provided as an argument and --ref was not specified")
+	}
 
 	tp := jira.BasicAuthTransport{
 		Username: *jiraUser,
@@ -46,10 +70,10 @@ func cli() error {
 
 	// Prepare pull request body
 	body := ""
-	body += fmt.Sprintf("## [%v: %v](%v/browse/%v)\n", *jiraIssue, issue.Fields.Summary, *jiraURL, *jiraIssue)
-	body += fmt.Sprintf("### Description\n%v\n", issue.Fields.Description)
-	body += "### Tasks\n"
+	body += fmt.Sprintf("## [%v: %v](%v/browse/%v)\n\n", *jiraIssue, issue.Fields.Summary, *jiraURL, *jiraIssue)
+	body += fmt.Sprintf("### Description\n%v\n\n", issue.Fields.Description)
 	if issue.Fields.Subtasks != nil {
+		body += "### Tasks\n"
 		for _, subtask := range issue.Fields.Subtasks {
 			body += fmt.Sprintf("- [ ] %v\n", subtask.Fields.Summary)
 		}
@@ -82,4 +106,10 @@ func cli() error {
 		}
 	}
 	return nil
+}
+
+func isJiraIssue(s string) bool {
+	pattern := "^[A-Z]{1,10}-[0-9]{1,5}$"
+	regex := regexp.MustCompile(pattern)
+	return regex.MatchString(s)
 }
