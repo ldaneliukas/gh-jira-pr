@@ -37,6 +37,7 @@ ARGUMENTS:
 
 FLAGS:
  --web                         <string>  Open the web browser to create a pull request
+ --ref                         <string>  Use the current repository HEAD ref as the Jira issue
  --jira-url   (env JIRA_URL)   <string>  Jira server URL
  --jira-user  (env JIRA_USER)  <string>  Jira username 
  --jira-token (env JIRA_TOKEN) <string>  Jira auth token
@@ -47,6 +48,7 @@ INHERITED FLAGS
 
 
 EXAMPLES:
- $ gh jira-pr create IT-1234
- $ gh jira-pr create IT-1234 --jira-url https://company.atlassian.net
+ $ gh jira-pr IT-1234
+ $ gh jira-pr IT-1234 --jira-url https://company.atlassian.net
+ $ gh jira-pr --ref
 ```

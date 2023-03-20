@@ -27,7 +27,7 @@ func cli() error {
 	jiraUser := kingpin.Flag("jira-user", "Jira username").Envar("JIRA_USER").Required().String()
 	jiraToken := kingpin.Flag("jira-token", "Jira auth token").Envar("JIRA_TOKEN").Required().String()
 	jiraIssue := kingpin.Arg("jira-issue", "Jira issue to base the pul request on").String()
-	ref := kingpin.Flag("ref", "Use the HEAD ref as the Jira issue").Bool()
+	ref := kingpin.Flag("ref", "Use the current repository HEAD ref as the Jira issue").Bool()
 	ghWeb := kingpin.Flag("web", "Open the web browser to create a pull request").Bool()
 
 	kingpin.Parse()
