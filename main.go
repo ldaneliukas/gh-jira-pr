@@ -28,7 +28,7 @@ func cli() error {
 	jiraToken := kingpin.Flag("jira-token", "Jira auth token").Envar("JIRA_TOKEN").Required().String()
 	jiraIssue := kingpin.Arg("jira-issue", "Jira issue to base the pul request on").String()
 	ref := kingpin.Flag("ref", "Use the current repository HEAD ref as the Jira issue").Bool()
-	ghArgs := kingpin.Arg("gh-arg", "Additional args to pass to 'gh pr create'").Strings()
+	ghWeb := kingpin.Flag("web", "Open the web browser to create a pull request").Bool()
 
 	kingpin.Parse()
 
@@ -79,16 +79,10 @@ func cli() error {
 		}
 	}
 
-	fmt.Println(len(*ghArgs))
-	for _, arg := range *ghArgs {
-		fmt.Println(arg)
-	}
-	os.Exit(0)
-
 	// Create pull request
 	ghExecArgs := []string{"pr", "create", "--title", issue.Fields.Summary, "--body", body}
-	if len(*ghArgs) > 0 {
-		ghExecArgs = append(ghExecArgs, *ghArgs...)
+	if *ghWeb {
+		ghExecArgs = append(ghExecArgs, "--web")
 	}
 	pr, _, err := gh.Exec(ghExecArgs...)
 	if err != nil {
