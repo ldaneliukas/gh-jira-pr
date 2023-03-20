@@ -106,7 +106,7 @@ func cli() error {
 		}
 	}
 
-	fmt.Printf("Pull request: %v\nJira issue: %vbrowse/%v", prURL, jiraClient.BaseURL, *jiraIssue)
+	fmt.Printf("Pull request: %v\nJira issue: %vbrowse/%v\n", prURL[0], jiraClient.BaseURL, *jiraIssue)
 
 	return nil
 }
