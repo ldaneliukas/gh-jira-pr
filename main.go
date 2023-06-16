@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 	"github.com/cli/go-gh"
 	"github.com/go-git/go-git/v5"
@@ -28,7 +29,6 @@ func cli() error {
 	jiraToken := kingpin.Flag("jira-token", "Jira auth token").Envar("JIRA_TOKEN").Required().String()
 	jiraIssue := kingpin.Arg("jira-issue", "Jira issue to base the pul request on").String()
 	ref := kingpin.Flag("ref", "Use the current repository HEAD ref as the Jira issue").Bool()
-	ghWeb := kingpin.Flag("web", "Open the web browser to create a pull request").Bool()
 
 	kingpin.Parse()
 
@@ -44,10 +44,12 @@ func cli() error {
 			return fmt.Errorf("could not retrieve head ref: %v", err.Error())
 		}
 		branch := strings.Split(head.String(), "refs/heads/")[1]
-		if !isJiraIssue(branch) {
-			return fmt.Errorf("ref '%v' does not look like a Jira issue", branch)
-		}
 		*jiraIssue = branch
+	}
+
+	*jiraIssue = strings.ToUpper(*jiraIssue)
+	if !isJiraIssue(*jiraIssue) {
+		return fmt.Errorf("'%s' does not look like a Jira issue", *jiraIssue)
 	}
 
 	if *jiraIssue == "" {
@@ -63,15 +65,18 @@ func cli() error {
 	if err != nil {
 		return fmt.Errorf("could not create jira client: %v", err.Error())
 	}
-	issue, _, err := jiraClient.Issue.Get(ctx, *jiraIssue, nil)
+	options := &jira.GetQueryOptions{
+		Expand: "renderedFields",
+	}
+	issue, _, err := jiraClient.Issue.Get(ctx, *jiraIssue, options)
 	if err != nil {
-		return fmt.Errorf("could not retrieve jira issue: %v", err.Error())
+		return fmt.Errorf("could not retrieve jira issue '%s': %v", *jiraIssue, err.Error())
 	}
 
 	// Prepare pull request body
 	body := ""
-	body += fmt.Sprintf("## [%v: %v](%v/browse/%v)\n\n", *jiraIssue, issue.Fields.Summary, *jiraURL, *jiraIssue)
-	body += fmt.Sprintf("### Description\n%v\n\n", issue.Fields.Description)
+	body += fmt.Sprintf("## [%v - %v](%v/browse/%v)\n\n", *jiraIssue, issue.Fields.Summary, *jiraURL, *jiraIssue)
+	body += fmt.Sprintf("### Description\n%v\n\n", htmlToMarkdown(issue.RenderedFields.Description))
 	if len(issue.Fields.Subtasks) > 0 {
 		body += "### Tasks\n"
 		for _, subtask := range issue.Fields.Subtasks {
@@ -81,9 +86,6 @@ func cli() error {
 
 	// Create pull request
 	ghExecArgs := []string{"pr", "create", "--title", issue.Fields.Summary, "--body", body}
-	if *ghWeb {
-		ghExecArgs = append(ghExecArgs, "--web")
-	}
 	pr, _, err := gh.Exec(ghExecArgs...)
 	if err != nil {
 		return fmt.Errorf("could not create pull request: %v", err.Error())
@@ -112,7 +114,13 @@ func cli() error {
 }
 
 func isJiraIssue(s string) bool {
-	pattern := "^[A-Z]{1,10}-[0-9]{1,5}$"
+	pattern := "^[a-zA-Z]{1,10}-[0-9]{1,5}$"
 	regex := regexp.MustCompile(pattern)
 	return regex.MatchString(s)
+}
+
+func htmlToMarkdown(s string) string {
+	converter := md.NewConverter("", true, nil)
+	markdown, _ := converter.ConvertString(s)
+	return markdown
 }

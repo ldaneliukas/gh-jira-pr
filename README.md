@@ -8,8 +8,6 @@ Field mapping:
 - Jira issue description -> Pull request body
 - Jira issue subtasks    -> Pull request body tasks
 
-Note, when `--web` is used, the pull request will not be linked to the Jira issue.
-
 ## Setup
 
 1. Install the `gh` CLI - see the [installation](https://github.com/cli/cli#installation)
@@ -36,7 +34,6 @@ ARGUMENTS:
 
 
 FLAGS:
- --web                         <string>  Open the web browser to create a pull request
  --ref                         <string>  Use the current repository HEAD ref as the Jira issue
  --jira-url   (env JIRA_URL)   <string>  Jira server URL
  --jira-user  (env JIRA_USER)  <string>  Jira username 
